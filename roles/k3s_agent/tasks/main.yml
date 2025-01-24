@@ -19,7 +19,7 @@
   block:
     - name: Download K3s install script
       ansible.builtin.get_url:
-        url: https://get.k3s.io/
+        url: "{{ k3s_script_url if k3s_script_url is defined else 'https://get.k3s.io/' }}"
         timeout: 120
         dest: /usr/local/bin/k3s-install.sh
         owner: root
@@ -35,6 +35,20 @@
         INSTALL_K3S_MIRROR: "{{ k3s_mirror }}"
         INSTALL_K3S_EXEC: "agent"
       changed_when: true
+
+- name: Setup optional config file
+  when: agent_config_yaml is defined
+  block:
+    - name: Make config directory
+      ansible.builtin.file:
+        path: "/etc/rancher/k3s"
+        mode: "0755"
+        state: directory
+    - name: Copy config values
+      ansible.builtin.copy:
+        content: "{{ agent_config_yaml }}"
+        dest: "/etc/rancher/k3s/config.yaml"
+        mode: "0644"
 
 - name: Get the token from the first server
   ansible.builtin.set_fact:

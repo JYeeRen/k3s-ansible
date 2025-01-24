@@ -19,7 +19,7 @@
   block:
     - name: Download K3s install script
       ansible.builtin.get_url:
-        url: "{{ k3s_script_url | default('https://get.k3s.io/') }}"
+        url: "{{ k3s_script_url if k3s_script_url is defined else 'https://get.k3s.io/' }}"
         timeout: 120
         dest: /usr/local/bin/k3s-install.sh
         owner: root
